@@ -27,8 +27,10 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./cloud.db"
 
-    # Security (used in Sprint 2 for JWT)
+    # Security — JWT Authentication
     SECRET_KEY: str = "change-me-before-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     # App
     DEBUG: bool = True
