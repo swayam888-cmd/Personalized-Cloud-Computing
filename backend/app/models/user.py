@@ -29,7 +29,8 @@ EXAMPLE:
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, BigInteger
+from sqlalchemy.orm import relationship
 
 from app.database.session import Base
 
@@ -66,6 +67,15 @@ class User(Base):
     # Role: "user" or "admin" — for future access control
     role = Column(String, default="user")
 
+    # ─── Storage Quota ───────────────────────────────────
+    # Maximum storage space allowed for this user (in bytes)
+    # Default: 1 GB (1024 * 1024 * 1024 = 1073741824)
+    storage_quota_bytes = Column(
+        BigInteger,
+        default=1073741824,
+        nullable=False,
+    )
+
     # ─── Timestamps ──────────────────────────────────────
     created_at = Column(
         DateTime,
@@ -76,3 +86,8 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+    # ─── Relationships ───────────────────────────────────
+    # Access all files owned by this user: user.files → [File, ...]
+    files = relationship("File", back_populates="owner", cascade="all, delete-orphan")
+

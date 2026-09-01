@@ -27,7 +27,7 @@ See [docs/architecture.md](docs/architecture.md) for details.
 | Frontend   | React, Vite, Tailwind CSS v4      |
 | Backend    | Python, FastAPI, SQLAlchemy        |
 | Database   | SQLite (dev) → PostgreSQL (prod)   |
-| Auth       | JWT (coming in Sprint 2)           |
+| Auth       | JWT (Bearer tokens)              |
 | Storage    | Local filesystem → MinIO (future)  |
 | AI         | Ollama + Qwen/Llama (future)       |
 
@@ -107,8 +107,8 @@ Visit **http://localhost:5173** to see the app.
 ## 🗺️ Development Roadmap
 
 - [x] **Sprint 1** — Foundation (project structure, health check, frontend ↔ backend)
-- [ ] **Sprint 2** — Authentication (register, login, JWT, protected routes)
-- [ ] **Sprint 3** — Personal Cloud Storage (upload, download, folders)
+- [x] **Sprint 2** — Authentication (register, login, JWT, protected routes)
+- [x] **Sprint 3** — Personal Cloud Storage (upload, download, folders)
 - [ ] **Sprint 4** — Cloud Dashboard (stats, recent files, profile)
 - [ ] **Sprint 5** — Docker Infrastructure
 - [ ] **Sprint 6** — Cloud Services (app deployment, monitoring)

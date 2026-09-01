@@ -49,6 +49,11 @@ yarn-error.log*
 *.sqlite3
 
 # ========================
+# File Storage (user uploads)
+# ========================
+storage/
+
+# ========================
 # Docker (local volumes)
 # ========================
 docker/volumes/

@@ -66,6 +66,20 @@
   50% { opacity: 0.7; }
 }
 
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+@keyframes drop-zone-pulse {
+  0%, 100% { border-color: var(--color-brand-500); background-color: rgba(51, 129, 255, 0.05); }
+  50% { border-color: var(--color-accent-400); background-color: rgba(34, 211, 238, 0.08); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* Base styles */
 body {
   background-color: var(--color-surface-900);

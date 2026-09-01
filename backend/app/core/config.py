@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     APP_NAME: str = "Personalized Cloud Computing"
 
+    # Storage — file uploads
+    STORAGE_DIR: str = "storage"        # Root directory for user files
+    MAX_FILE_SIZE_MB: int = 50           # Max upload size per file
+    DEFAULT_QUOTA_MB: int = 1024         # Default 1 GB quota per user
+
     # CORS — origins allowed to call this API
     # In development: the Vite dev server
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]

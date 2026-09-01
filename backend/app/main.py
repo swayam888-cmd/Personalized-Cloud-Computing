@@ -27,9 +27,11 @@ from app.database.session import Base, engine
 from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
+from app.api.files import router as files_router
 
 # Import models so SQLAlchemy knows about them when creating tables
 from app.models import user as _user_model  # noqa: F401
+from app.models import file as _file_model  # noqa: F401
 
 
 # ─── Lifespan (startup/shutdown) ────────────────────────
@@ -73,6 +75,7 @@ app.add_middleware(
 app.include_router(health_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
+app.include_router(files_router, prefix="/api")
 
 
 # ─── Root Endpoint ──────────────────────────────────────

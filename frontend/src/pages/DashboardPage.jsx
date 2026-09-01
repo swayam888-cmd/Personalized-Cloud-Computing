@@ -4,22 +4,28 @@
  * The first page users see after logging in.
  * This is a PROTECTED page — only accessible with a valid JWT.
  *
- * For Sprint 2, this is a simple "Welcome" page that proves:
- * 1. Registration works
- * 2. Login works
- * 3. JWT tokens work
- * 4. Protected routes work
- * 5. The user's profile is loaded correctly
- *
- * Sprint 3 will expand this with file management, storage stats, etc.
+ * Shows:
+ * 1. Welcome message with user info
+ * 2. Live storage stats from the API
+ * 3. Quick-action cards (My Files, profile info)
+ * 4. Profile details
  */
 
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { getStorageStats } from '../api/files'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [stats, setStats] = useState(null)
+
+  useEffect(() => {
+    getStorageStats()
+      .then((res) => setStats(res.data))
+      .catch(() => {}) // Silently fail — stats card will show fallback
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -32,6 +38,23 @@ export default function DashboardPage() {
     month: 'long',
     day: 'numeric',
   })
+
+  // Format bytes to human-readable
+  const formatSize = (bytes) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
+  const storageLabel = stats
+    ? `${formatSize(stats.used_bytes)} / ${formatSize(stats.quota_bytes)}`
+    : 'Loading...'
+
+  const usagePercent = stats
+    ? Math.min(100, Math.round((stats.used_bytes / stats.quota_bytes) * 100))
+    : 0
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -102,9 +125,19 @@ export default function DashboardPage() {
               </svg>
             }
             label="Storage"
-            value="Coming in Sprint 3"
+            value={storageLabel}
             accent="accent"
-          />
+          >
+            {/* Mini progress bar */}
+            {stats && (
+              <div className="mt-2 h-1.5 bg-surface-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-accent-500 to-accent-400 transition-all duration-500"
+                  style={{ width: `${Math.max(usagePercent, 2)}%` }}
+                />
+              </div>
+            )}
+          </StatCard>
           <StatCard
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
@@ -115,6 +148,54 @@ export default function DashboardPage() {
             value={memberSince}
             accent="success"
           />
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          <Link
+            to="/files"
+            className="group bg-surface-800/80 backdrop-blur-xl border border-surface-600/50 rounded-2xl p-6 shadow-2xl hover:border-brand-500/30 transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-brand-500/15 border border-brand-500/20 flex items-center justify-center text-brand-400 group-hover:bg-brand-500/25 transition-all">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">My Files</h3>
+                <p className="text-sm text-slate-400">
+                  {stats
+                    ? `${stats.file_count} files, ${stats.folder_count} folders`
+                    : 'Browse your cloud storage'}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-1 text-sm text-brand-400 group-hover:gap-2 transition-all">
+              Open file manager
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </div>
+          </Link>
+
+          <div className="bg-surface-800/80 backdrop-blur-xl border border-surface-600/50 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">System Status</h3>
+                <p className="text-sm text-slate-400">All services operational</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-sm text-emerald-400">Online</span>
+            </div>
+          </div>
         </div>
 
         {/* Profile card */}
@@ -136,7 +217,7 @@ export default function DashboardPage() {
 }
 
 /** Stat card component */
-function StatCard({ icon, label, value, accent }) {
+function StatCard({ icon, label, value, accent, children }) {
   const colors = {
     brand: 'text-brand-400 bg-brand-500/10 border-brand-500/20',
     accent: 'text-accent-400 bg-accent-500/10 border-accent-500/20',
@@ -150,6 +231,7 @@ function StatCard({ icon, label, value, accent }) {
       </div>
       <p className="text-sm text-slate-400 mb-1">{label}</p>
       <p className="text-white font-semibold">{value}</p>
+      {children}
     </div>
   )
 }
