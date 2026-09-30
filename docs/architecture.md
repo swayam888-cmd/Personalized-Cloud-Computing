@@ -108,10 +108,15 @@ Browser → GET /api/health
 | Tailwind CSS v4 | Utility-first CSS, CSS-first config, no build step       |
 
 ## Future Evolution
+ 
+The modular structure is designed for incremental growth across the 12-sprint roadmap:
 
-The modular structure is designed for incremental growth:
-
-- **Sprint 2**: Add `models/user.py`, `schemas/user.py`, `services/auth.py`, `api/auth.py`
-- **Sprint 3**: Add `services/storage.py`, `api/files.py`, storage backends
-- **Sprint 5**: Add `docker/` with Compose files
-- **Sprint 7**: Add `services/ai.py` with Ollama integration
+- **Sprint 4**: Add `models/activity.py`, `services/activity.py`, `api/activity.py`, profile & password editing, storage category analytics
+- **Sprint 5**: LAN multi-device access configuration (0.0.0.0 binding, host IP resolution, CORS LAN origins)
+- **Sprint 6**: Admin dashboard, user administration, and `psutil` system resource monitoring
+- **Sprint 7**: File sharing subsystem (`models/share.py`, secure share tokens, expiration, permissions)
+- **Sprint 8**: PostgreSQL integration & Alembic database migrations
+- **Sprint 9**: Docker containerization (`docker/Dockerfile.*`, `docker-compose.yml`)
+- **Sprint 10**: Advanced cloud services (MinIO object storage, backup services, health probes)
+- **Sprint 11**: Automated test suites (`pytest`, `vitest`) and security hardening
+- **Sprint 12**: Optional local AI assistant (Ollama integration, document Q&A)

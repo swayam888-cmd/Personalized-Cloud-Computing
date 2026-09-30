@@ -91,3 +91,7 @@ class User(Base):
     # Access all files owned by this user: user.files → [File, ...]
     files = relationship("File", back_populates="owner", cascade="all, delete-orphan")
 
+    # Access all activity logs for this user: user.activities → [Activity, ...]
+    activities = relationship("Activity", back_populates="user", cascade="all, delete-orphan")
+
+

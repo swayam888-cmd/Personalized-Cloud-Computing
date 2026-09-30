@@ -1,8 +1,8 @@
-# ☁️ Personalized Cloud Computing
+# ☁️ Personalized Cloud Infrastructure for Secure Data Storage and Management
 
-A personal cloud platform built from scratch — starting with cloud storage and evolving into a full-featured cloud environment.
+A self-hosted personal cloud platform built from scratch — starting with cloud storage and evolving into a full-featured, containerized private cloud environment.
 
-**B.Tech Final Year Project**
+**B.Tech Major Project**
 
 ---
 
@@ -27,9 +27,11 @@ See [docs/architecture.md](docs/architecture.md) for details.
 | Frontend   | React, Vite, Tailwind CSS v4      |
 | Backend    | Python, FastAPI, SQLAlchemy        |
 | Database   | SQLite (dev) → PostgreSQL (prod)   |
-| Auth       | JWT (Bearer tokens)              |
+| Auth       | JWT (Bearer tokens) + Bcrypt      |
 | Storage    | Local filesystem → MinIO (future)  |
-| AI         | Ollama + Qwen/Llama (future)       |
+| Monitoring | psutil (Sprint 6+)                |
+| Containers | Docker, Docker Compose (Sprint 9+)|
+| AI         | Ollama + Local LLM (Sprint 12)    |
 
 ---
 
@@ -40,11 +42,11 @@ Personalized-Cloud-Computing/
 ├── backend/             # FastAPI application
 │   ├── app/
 │   │   ├── api/         # Route handlers
-│   │   ├── core/        # Config, settings
+│   │   ├── core/        # Config, security
 │   │   ├── database/    # DB engine, session
-│   │   ├── models/      # SQLAlchemy models (Sprint 2+)
-│   │   ├── schemas/     # Pydantic schemas (Sprint 2+)
-│   │   ├── services/    # Business logic (Sprint 2+)
+│   │   ├── models/      # SQLAlchemy models
+│   │   ├── schemas/     # Pydantic schemas
+│   │   ├── services/    # Business logic
 │   │   └── main.py      # App entry point
 │   ├── requirements.txt
 │   └── .env.example
@@ -52,7 +54,7 @@ Personalized-Cloud-Computing/
 │   ├── src/
 │   └── package.json
 ├── docs/                # Project documentation
-├── docker/              # Docker configs (Sprint 5+)
+├── docker/              # Docker configs (Sprint 9+)
 ├── .gitignore
 └── README.md
 ```
@@ -106,14 +108,18 @@ Visit **http://localhost:5173** to see the app.
 
 ## 🗺️ Development Roadmap
 
-- [x] **Sprint 1** — Foundation (project structure, health check, frontend ↔ backend)
-- [x] **Sprint 2** — Authentication (register, login, JWT, protected routes)
-- [x] **Sprint 3** — Personal Cloud Storage (upload, download, folders)
-- [ ] **Sprint 4** — Cloud Dashboard (stats, recent files, profile)
-- [ ] **Sprint 5** — Docker Infrastructure
-- [ ] **Sprint 6** — Cloud Services (app deployment, monitoring)
-- [ ] **Sprint 7** — AI Assistant (Ollama + local LLM)
-- [ ] **Sprint 8** — Advanced Features (backup, sharing, RBAC)
+- [x] **Sprint 1** — Project Foundation (project structure, health check, frontend ↔ backend)
+- [x] **Sprint 2** — Authentication & User Access (register, login, JWT, protected routes)
+- [x] **Sprint 3** — Personal Cloud Storage (upload, download, folders, quota, UUID storage)
+- [ ] **Sprint 4** — Cloud Dashboard & Activity (analytics, recent files, profile, activity logs)
+- [ ] **Sprint 5** — LAN Private Cloud Deployment (multi-device access, LAN IP configuration)
+- [ ] **Sprint 6** — Administration & Resource Monitoring (admin dashboard, user mgmt, psutil)
+- [ ] **Sprint 7** — File Sharing & Collaboration (share links, expiration, passwords)
+- [ ] **Sprint 8** — PostgreSQL & Database Migrations (PostgreSQL driver, Alembic migrations)
+- [ ] **Sprint 9** — Docker & Containerized Infrastructure (Dockerfiles, Docker Compose)
+- [ ] **Sprint 10** — Cloud Infrastructure Services (MinIO object storage, backups, health monitoring)
+- [ ] **Sprint 11** — Testing & Security Hardening (test suites, rate limiting, security headers)
+- [ ] **Sprint 12** — Optional Local AI Assistant (Ollama, local LLM document assistance)
 
 ---
 
