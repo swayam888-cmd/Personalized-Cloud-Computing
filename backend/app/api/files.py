@@ -38,6 +38,7 @@ from app.schemas.file import (
     StorageStats,
 )
 from app.services import storage as storage_service
+from app.services import activity as activity_service
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -119,6 +120,13 @@ async def upload_file(
         db_file = await storage_service.save_uploaded_file(
             db, user, file, parent_id
         )
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="UPLOAD",
+            item_name=db_file.name,
+            details=f"Uploaded '{db_file.name}' ({activity_service.format_file_size(db_file.size_bytes)})",
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -143,6 +151,13 @@ def create_folder(
     try:
         folder = storage_service.create_folder(
             db, user, folder_data.name, folder_data.parent_id
+        )
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="CREATE_FOLDER",
+            item_name=folder.name,
+            details=f"Created folder '{folder.name}'",
         )
     except ValueError as e:
         raise HTTPException(
@@ -205,6 +220,14 @@ def download_file(
             detail="File content not found on disk",
         )
 
+    activity_service.log_activity(
+        db=db,
+        user_id=user.id,
+        action="DOWNLOAD",
+        item_name=file.name,
+        details=f"Downloaded '{file.name}'",
+    )
+
     return FastAPIFileResponse(
         path=str(file_path),
         filename=file.name,
@@ -240,7 +263,16 @@ def rename_file(
 ):
     """Rename a file or folder."""
     try:
+        current_file = storage_service.get_file(db, user.id, file_id)
+        old_name = current_file.name if current_file else ""
         file = storage_service.rename_file(db, user.id, file_id, data.name)
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="RENAME",
+            item_name=file.name,
+            details=f"Renamed '{old_name}' to '{file.name}'",
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -259,6 +291,17 @@ def move_file(
     """Move a file or folder to a different location."""
     try:
         file = storage_service.move_file(db, user.id, file_id, data.parent_id)
+        dest_desc = "root directory"
+        if data.parent_id is not None:
+            dest_folder = storage_service.get_file(db, user.id, data.parent_id)
+            dest_desc = f"folder '{dest_folder.name}'" if dest_folder else f"folder #{data.parent_id}"
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="MOVE",
+            item_name=file.name,
+            details=f"Moved '{file.name}' to {dest_desc}",
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -274,8 +317,24 @@ def delete_file(
     db: Session = Depends(get_db),
 ):
     """Delete a file or folder (and all its children)."""
+    target = storage_service.get_file(db, user.id, file_id)
+    if target is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found",
+        )
+    item_name = target.name
+    item_type = "folder" if target.is_folder else "file"
+
     try:
         storage_service.delete_file(db, user.id, file_id)
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="DELETE",
+            item_name=item_name,
+            details=f"Deleted {item_type} '{item_name}'",
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

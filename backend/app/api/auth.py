@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
 from app.services.auth import register_user, authenticate_user, create_access_token
+from app.services import activity as activity_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -47,6 +48,13 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     try:
         user = register_user(db, user_data)
+        activity_service.log_activity(
+            db=db,
+            user_id=user.id,
+            action="REGISTER",
+            item_name=None,
+            details=f"Account created for user '{user.username}'",
+        )
     except ValueError as e:
         # register_user raises ValueError for duplicate email/username
         raise HTTPException(
@@ -88,5 +96,13 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
     # Create a JWT token with the user's ID as the "subject"
     access_token = create_access_token(data={"sub": str(user.id)})
+
+    activity_service.log_activity(
+        db=db,
+        user_id=user.id,
+        action="LOGIN",
+        item_name=None,
+        details=f"User '{user.username}' logged in",
+    )
 
     return Token(access_token=access_token)
