@@ -8,23 +8,35 @@
  * 1. Welcome message with user info
  * 2. Live storage stats from the API
  * 3. Quick-action cards (My Files, profile info)
- * 4. Profile details
+ * 4. Recent Activity feed (from audit trail)
+ * 5. Profile details
  */
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import { getStorageStats } from '../api/files'
+import { listActivities } from '../api/activities'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [stats, setStats] = useState(null)
+  const [activities, setActivities] = useState([])
+  const [activitiesLoading, setActivitiesLoading] = useState(true)
 
   useEffect(() => {
     getStorageStats()
       .then((res) => setStats(res.data))
       .catch(() => {}) // Silently fail — stats card will show fallback
+  }, [])
+
+  useEffect(() => {
+    setActivitiesLoading(true)
+    listActivities({ limit: 10 })
+      .then((res) => setActivities(res.data.items))
+      .catch(() => {})
+      .finally(() => setActivitiesLoading(false))
   }, [])
 
   const handleLogout = () => {
@@ -198,6 +210,31 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Recent Activity */}
+        <div className="bg-surface-800/80 backdrop-blur-xl border border-surface-600/50 rounded-2xl p-6 shadow-2xl mb-10">
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-5">
+            Recent Activity
+          </h2>
+          {activitiesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="text-center py-8">
+              <svg className="w-10 h-10 mx-auto text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+              <p className="text-slate-500 text-sm">No activity yet. Start uploading files!</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {activities.map((act) => (
+                <ActivityRow key={act.id} activity={act} />
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Profile card */}
         <div className="bg-surface-800/80 backdrop-blur-xl border border-surface-600/50 rounded-2xl p-6 shadow-2xl">
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-5">
@@ -212,6 +249,65 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+    </div>
+  )
+}
+
+/** Action type → icon + color mapping */
+const ACTION_META = {
+  REGISTER:      { emoji: '🎉', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  LOGIN:         { emoji: '🔑', color: 'text-blue-400',   bg: 'bg-blue-500/10' },
+  UPLOAD:        { emoji: '📤', color: 'text-green-400',  bg: 'bg-green-500/10' },
+  DOWNLOAD:      { emoji: '📥', color: 'text-cyan-400',   bg: 'bg-cyan-500/10' },
+  DELETE:        { emoji: '🗑️', color: 'text-red-400',    bg: 'bg-red-500/10' },
+  RENAME:        { emoji: '✏️', color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+  MOVE:          { emoji: '📁', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  CREATE_FOLDER: { emoji: '📂', color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+}
+
+/** Format timestamp to relative or readable form */
+function formatRelativeTime(isoString) {
+  const date = new Date(isoString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffHrs = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMin < 1) return 'just now'
+  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffHrs < 24) return `${diffHrs}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+/** Single activity row */
+function ActivityRow({ activity }) {
+  const meta = ACTION_META[activity.action] || { emoji: '📋', color: 'text-slate-400', bg: 'bg-slate-500/10' }
+
+  return (
+    <div className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-surface-700/30 transition-colors group">
+      <div className={`w-8 h-8 rounded-lg ${meta.bg} flex items-center justify-center text-sm shrink-0`}>
+        {meta.emoji}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-semibold uppercase tracking-wide ${meta.color}`}>
+            {activity.action.replace('_', ' ')}
+          </span>
+          {activity.item_name && (
+            <span className="text-sm text-white truncate">
+              — {activity.item_name}
+            </span>
+          )}
+        </div>
+        {activity.details && (
+          <p className="text-xs text-slate-500 truncate mt-0.5">{activity.details}</p>
+        )}
+      </div>
+      <span className="text-xs text-slate-600 whitespace-nowrap shrink-0 group-hover:text-slate-500 transition-colors">
+        {formatRelativeTime(activity.timestamp)}
+      </span>
     </div>
   )
 }
