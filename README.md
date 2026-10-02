@@ -111,7 +111,7 @@ Visit **http://localhost:5173** to see the app.
 - [x] **Sprint 1** — Project Foundation (project structure, health check, frontend ↔ backend)
 - [x] **Sprint 2** — Authentication & User Access (register, login, JWT, protected routes)
 - [x] **Sprint 3** — Personal Cloud Storage (upload, download, folders, quota, UUID storage)
-- [ ] **Sprint 4** — Cloud Dashboard & Activity (analytics, recent files, profile, activity logs)
+- [x] **Sprint 4** — Cloud Dashboard & Activity (analytics, recent files, profile, activity logs)
 - [ ] **Sprint 5** — LAN Private Cloud Deployment (multi-device access, LAN IP configuration)
 - [ ] **Sprint 6** — Administration & Resource Monitoring (admin dashboard, user mgmt, psutil)
 - [ ] **Sprint 7** — File Sharing & Collaboration (share links, expiration, passwords)
