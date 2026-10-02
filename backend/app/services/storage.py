@@ -74,12 +74,30 @@ def get_used_bytes(db: Session, user_id: int) -> int:
     return int(result)
 
 
+DOCUMENT_EXTENSIONS = {".pdf", ".docx", ".doc", ".txt", ".rtf", ".odt"}
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".svg", ".gif", ".webp", ".bmp"}
+MEDIA_EXTENSIONS = {".mp4", ".mp3", ".wav", ".mkv", ".avi", ".mov", ".flac"}
+
+
+def categorize_file(filename: str) -> str:
+    """Classify a file into documents, images, media, or other based on its extension."""
+    ext = os.path.splitext(filename)[1].lower()
+    if ext in DOCUMENT_EXTENSIONS:
+        return "documents"
+    elif ext in IMAGE_EXTENSIONS:
+        return "images"
+    elif ext in MEDIA_EXTENSIONS:
+        return "media"
+    return "other"
+
+
 def get_storage_stats(db: Session, user: User) -> dict:
     """
     Get comprehensive storage stats for a user.
 
     Returns:
-        Dictionary with used_bytes, quota_bytes, file_count, folder_count
+        Dictionary with used_bytes, quota_bytes, remaining_bytes, used_percentage,
+        file_count, folder_count
     """
     used_bytes = get_used_bytes(db, user.id)
 
@@ -95,11 +113,56 @@ def get_storage_stats(db: Session, user: User) -> dict:
         .scalar()
     )
 
+    remaining_bytes = max(0, user.storage_quota_bytes - used_bytes)
+    used_percentage = (
+        round((used_bytes / user.storage_quota_bytes) * 100, 2)
+        if user.storage_quota_bytes > 0
+        else 0.0
+    )
+
     return {
         "used_bytes": used_bytes,
         "quota_bytes": user.storage_quota_bytes,
+        "remaining_bytes": remaining_bytes,
+        "used_percentage": used_percentage,
         "file_count": file_count,
         "folder_count": folder_count,
+    }
+
+
+def get_storage_analytics(db: Session, user: User) -> dict:
+    """
+    Get detailed storage analytics for a user including breakdown by category:
+    Documents, Images, Media, Other.
+    """
+    stats = get_storage_stats(db, user)
+    used_bytes = stats["used_bytes"]
+
+    categories = {
+        "documents": {"name": "documents", "size_bytes": 0, "file_count": 0, "percentage": 0.0},
+        "images": {"name": "images", "size_bytes": 0, "file_count": 0, "percentage": 0.0},
+        "media": {"name": "media", "size_bytes": 0, "file_count": 0, "percentage": 0.0},
+        "other": {"name": "other", "size_bytes": 0, "file_count": 0, "percentage": 0.0},
+    }
+
+    files = (
+        db.query(File.name, File.size_bytes)
+        .filter(File.owner_id == user.id, File.is_folder == False)  # noqa: E712
+        .all()
+    )
+
+    for f_name, f_size in files:
+        cat = categorize_file(f_name)
+        categories[cat]["size_bytes"] += f_size
+        categories[cat]["file_count"] += 1
+
+    if used_bytes > 0:
+        for cat in categories.values():
+            cat["percentage"] = round((cat["size_bytes"] / used_bytes) * 100, 1)
+
+    return {
+        **stats,
+        "categories": categories,
     }
 
 

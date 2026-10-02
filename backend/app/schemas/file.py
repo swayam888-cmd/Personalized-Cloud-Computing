@@ -106,3 +106,29 @@ class StorageStats(BaseModel):
     quota_bytes: int        # Maximum allowed bytes
     file_count: int         # Number of files (not folders)
     folder_count: int       # Number of folders
+    remaining_bytes: int = 0
+    used_percentage: float = 0.0
+
+
+# ─── Storage Analytics (Sprint 4) ────────────────────────
+class CategoryStats(BaseModel):
+    """Storage breakdown for a single category."""
+    name: str               # "documents", "images", "media", "other"
+    size_bytes: int         # Bytes used in this category
+    file_count: int         # Number of files in this category
+    percentage: float       # Percentage of total used storage (0.0 to 100.0)
+
+
+class StorageAnalytics(BaseModel):
+    """
+    Comprehensive storage analytics for the dashboard.
+
+    GET /api/files/analytics
+    """
+    used_bytes: int
+    quota_bytes: int
+    remaining_bytes: int
+    used_percentage: float
+    file_count: int
+    folder_count: int
+    categories: dict[str, CategoryStats]

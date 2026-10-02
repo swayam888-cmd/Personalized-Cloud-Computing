@@ -36,6 +36,7 @@ from app.schemas.file import (
     FileRename,
     FileMove,
     StorageStats,
+    StorageAnalytics,
 )
 from app.services import storage as storage_service
 from app.services import activity as activity_service
@@ -90,6 +91,20 @@ def get_stats(
     Returns used space, quota, file count, and folder count.
     """
     return storage_service.get_storage_stats(db, user)
+
+
+@router.get("/analytics", response_model=StorageAnalytics)
+def get_analytics(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get comprehensive storage analytics for the current user.
+
+    Returns used space, quota, remaining quota, percentage, counts,
+    and category breakdown (documents, images, media, other).
+    """
+    return storage_service.get_storage_analytics(db, user)
 
 
 # ═══════════════════════════════════════════════════════════
