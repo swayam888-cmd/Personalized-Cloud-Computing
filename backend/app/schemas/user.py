@@ -83,6 +83,24 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ─── Profile Update (Sprint 4) ───────────────────────────
+class UserUpdate(BaseModel):
+    """
+    What the client sends when updating their profile.
+
+    PUT /api/users/me
+    Body: { "username": "new_name", "email": "new@example.com" }
+    """
+
+    email: EmailStr | None = None
+    username: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=50,
+        pattern=r"^[a-zA-Z0-9_]+$",
+    )
+
+
 # ─── Token ───────────────────────────────────────────────
 class Token(BaseModel):
     """
