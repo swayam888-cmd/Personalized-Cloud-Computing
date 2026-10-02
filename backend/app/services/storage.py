@@ -166,6 +166,31 @@ def get_storage_analytics(db: Session, user: User) -> dict:
     }
 
 
+def get_recent_files(
+    db: Session,
+    user_id: int,
+    limit: int = 5,
+) -> list[File]:
+    """
+    Retrieve the user's most recently uploaded or modified files (excluding folders).
+
+    Args:
+        db: Active database session
+        user_id: The requesting user's ID
+        limit: Maximum number of files to return (default: 5)
+
+    Returns:
+        List of File objects ordered newest first
+    """
+    return (
+        db.query(File)
+        .filter(File.owner_id == user_id, File.is_folder == False)  # noqa: E712
+        .order_by(File.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+
 # ═══════════════════════════════════════════════════════════
 # File Operations
 # ═══════════════════════════════════════════════════════════

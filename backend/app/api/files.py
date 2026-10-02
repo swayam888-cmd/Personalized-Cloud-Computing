@@ -107,6 +107,21 @@ def get_analytics(
     return storage_service.get_storage_analytics(db, user)
 
 
+@router.get("/recent", response_model=list[FileResponse])
+def get_recent(
+    limit: int = Query(default=5, ge=1, le=20, description="Number of recent files to return"),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get the most recently uploaded or modified files for the current user.
+
+    Returns up to `limit` files (default 5) sorted newest first.
+    Excludes folders and physical storage paths.
+    """
+    return storage_service.get_recent_files(db, user.id, limit=limit)
+
+
 # ═══════════════════════════════════════════════════════════
 # Upload & Create
 # ═══════════════════════════════════════════════════════════
