@@ -115,6 +115,21 @@ export function getStorageStats() {
 }
 
 /**
+ * Get detailed storage analytics including category breakdown.
+ */
+export function getStorageAnalytics() {
+  return api.get('/api/files/analytics')
+}
+
+/**
+ * Get user's most recent files.
+ * @param {number} [limit=5]
+ */
+export function getRecentFiles(limit = 5) {
+  return api.get('/api/files/recent', { params: { limit } })
+}
+
+/**
  * Get breadcrumb trail for a folder.
  * @param {number} folderId
  */
