@@ -85,48 +85,62 @@ def log_activity(
         return None
 
 
+
+
+def get_activity_count(db: Session, user_id: int, action: str | None = None) -> int:
+    """
+    Get the total count of activities for a user, optionally filtered by action.
+
+    Args:
+        db: Active database session
+        user_id: ID of the user
+        action: Optional action type filter (e.g. 'UPLOAD', 'LOGIN')
+
+    Returns:
+        Total number of recorded activities.
+    """
+    query = (
+        db.query(func.count(Activity.id))
+        .filter(Activity.user_id == user_id)
+    )
+    if action is not None:
+        query = query.filter(Activity.action == action.upper())
+    count = query.scalar()
+    return int(count or 0)
+
+
 def get_user_activities(
     db: Session,
     user_id: int,
     limit: int = 20,
     offset: int = 0,
+    action: str | None = None,
 ) -> list[Activity]:
     """
-    Retrieve chronological activities for a user (newest first).
+    Retrieve chronological activities for a user (newest first),
+    optionally filtered by action type.
 
     Args:
         db: Active database session
         user_id: ID of the user
         limit: Maximum number of records to return
         offset: Offset for pagination
+        action: Optional action type filter (e.g. 'UPLOAD', 'LOGIN')
 
     Returns:
         List of Activity model instances.
     """
-    return (
+    query = (
         db.query(Activity)
         .filter(Activity.user_id == user_id)
+    )
+    if action is not None:
+        query = query.filter(Activity.action == action.upper())
+    return (
+        query
         .order_by(Activity.timestamp.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
 
-
-def get_activity_count(db: Session, user_id: int) -> int:
-    """
-    Get the total count of activities for a user.
-
-    Args:
-        db: Active database session
-        user_id: ID of the user
-
-    Returns:
-        Total number of recorded activities.
-    """
-    count = (
-        db.query(func.count(Activity.id))
-        .filter(Activity.user_id == user_id)
-        .scalar()
-    )
-    return int(count or 0)

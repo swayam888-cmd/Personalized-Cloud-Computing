@@ -28,6 +28,7 @@ from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
 from app.api.files import router as files_router
+from app.api.activity import router as activity_router
 
 # Import models so SQLAlchemy knows about them when creating tables
 from app.models import user as _user_model  # noqa: F401
@@ -77,6 +78,7 @@ app.include_router(health_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(files_router, prefix="/api")
+app.include_router(activity_router, prefix="/api")
 
 
 # ─── Root Endpoint ──────────────────────────────────────
