@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.user import User
-from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.user import UserResponse, UserUpdate, PasswordChange
+from app.services import auth as auth_service
 from app.services import activity as activity_service
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -93,3 +94,41 @@ def update_current_user(
         )
 
     return user
+
+
+@router.post("/change-password")
+def change_password(
+    data: PasswordChange,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Change password for the current authenticated user.
+
+    Verifies current password with bcrypt, validates and hashes the new password,
+    and logs the CHANGE_PASSWORD activity (never storing/logging plaintext passwords).
+    """
+    if not auth_service.verify_password(data.current_password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+
+    if data.current_password == data.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from current password",
+        )
+
+    user.hashed_password = auth_service.hash_password(data.new_password)
+    db.commit()
+
+    activity_service.log_activity(
+        db=db,
+        user_id=user.id,
+        action="CHANGE_PASSWORD",
+        item_name="Security",
+        details="Password was changed successfully",
+    )
+
+    return {"message": "Password changed successfully"}

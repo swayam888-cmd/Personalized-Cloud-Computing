@@ -101,6 +101,23 @@ class UserUpdate(BaseModel):
     )
 
 
+# ─── Password Change (Sprint 4) ──────────────────────────
+class PasswordChange(BaseModel):
+    """
+    What the client sends when changing their password.
+
+    POST /api/users/change-password
+    """
+
+    current_password: str = Field(..., min_length=1, description="Current password")
+    new_password: str = Field(
+        ...,
+        min_length=6,
+        max_length=100,
+        description="New password (minimum 6 characters)",
+    )
+
+
 # ─── Token ───────────────────────────────────────────────
 class Token(BaseModel):
     """
