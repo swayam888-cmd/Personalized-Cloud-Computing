@@ -95,6 +95,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  // ─── Update User Profile in State ────────────────────
+  const updateUser = (updatedData) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedData } : updatedData))
+  }
+
   // ─── Context Value ─────────────────────────────────
   const value = {
     user,
@@ -103,6 +108,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
   }
 
