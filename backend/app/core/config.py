@@ -42,6 +42,14 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE_MB: int = 50           # Max upload size per file
     DEFAULT_QUOTA_MB: int = 1024         # Default 1 GB quota per user
 
+    # ─── LAN Deployment (Sprint 5) ───────────────
+    # HOST: "127.0.0.1" = localhost only, "0.0.0.0" = all interfaces (LAN)
+    HOST: str = "127.0.0.1"
+    PORT: int = 8000
+    FRONTEND_PORT: int = 5173
+    # LAN_MODE: when True, auto-detects LAN IP and adds it to CORS
+    LAN_MODE: bool = False
+
     # CORS — origins allowed to call this API
     # In development: the Vite dev server
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
@@ -49,6 +57,36 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+    def get_cors_origins(self) -> list[str]:
+        """
+        Build the full list of allowed CORS origins.
+
+        In LAN mode, this dynamically adds the LAN IP-based origins
+        so that devices on the same network can make API calls.
+
+        WHY DYNAMIC?
+        The machine's LAN IP can change (DHCP). Hardcoding it in .env
+        would break whenever the router assigns a new IP. By detecting
+        it at startup, we always have the correct origin.
+        """
+        origins = list(self.CORS_ORIGINS)  # Copy the base list
+
+        if self.LAN_MODE:
+            from app.core.network import get_lan_ip
+            lan_ip = get_lan_ip()
+
+            if lan_ip != "127.0.0.1":
+                # Add LAN origins for both frontend and backend ports
+                lan_frontend = f"http://{lan_ip}:{self.FRONTEND_PORT}"
+                lan_backend = f"http://{lan_ip}:{self.PORT}"
+
+                if lan_frontend not in origins:
+                    origins.append(lan_frontend)
+                if lan_backend not in origins:
+                    origins.append(lan_backend)
+
+        return origins
 
 
 # Create a single instance that gets imported everywhere
