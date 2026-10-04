@@ -34,6 +34,7 @@ import StorageBreakdown from '../components/StorageBreakdown'
 import RecentFilesWidget from '../components/RecentFilesWidget'
 import ActivityTimeline from '../components/ActivityTimeline'
 import ProfileSecurityWidget from '../components/ProfileSecurityWidget'
+import NetworkStatusWidget from '../components/NetworkStatusWidget'
 
 function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B'
@@ -354,6 +355,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Network Status Widget (Sprint 5) */}
+        <NetworkStatusWidget />
 
         {/* Activity Timeline (Task 12) */}
         <ActivityTimeline activities={activities} loading={loading} />
