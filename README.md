@@ -16,6 +16,7 @@ FastAPI Backend (0.0.0.0:8000)
 Database (SQLite → PostgreSQL) & Isolated Storage (storage/<user_id>/)
 ```
 
+See [docs/user-guide.md](docs/user-guide.md) for the complete User & Feature Testing Guide.  
 See [docs/architecture.md](docs/architecture.md) for full architectural documentation.  
 See [docs/lan-setup.md](docs/lan-setup.md) for LAN multi-device access setup.
 
