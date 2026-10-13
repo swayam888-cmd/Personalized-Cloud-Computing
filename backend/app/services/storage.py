@@ -43,7 +43,7 @@ def _get_storage_root() -> Path:
     Get the absolute path to the storage root directory.
     Creates it if it doesn't exist.
     """
-    storage_root = Path(settings.STORAGE_DIR)
+    storage_root = settings.resolved_storage_dir
     storage_root.mkdir(parents=True, exist_ok=True)
     return storage_root
 

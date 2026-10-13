@@ -34,7 +34,10 @@ export default function LoginPage() {
     } catch (err) {
       // Extract error message from the API response
       const message =
-        err.response?.data?.detail || 'Login failed. Please try again.'
+        err.response?.data?.detail ||
+        (!err.response || err.code === 'ERR_NETWORK'
+          ? 'Cannot connect to backend server. Ensure the server is running on the LAN.'
+          : 'Login failed. Please try again.')
       setError(message)
     } finally {
       setLoading(false)

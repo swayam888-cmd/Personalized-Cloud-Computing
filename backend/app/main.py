@@ -89,12 +89,13 @@ app = FastAPI(
 
 # ─── CORS Middleware ─────────────────────────────────────
 # Allow the React dev server to make API calls.
-# In LAN mode, get_cors_origins() auto-adds the LAN IP-based origins
-# so other devices on the network can access the API.
+# In LAN mode, allow_origin_regex and get_cors_origins() permit connections
+# from any device on the local network (smartphones, tablets, laptops).
 cors_origins = settings.get_cors_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=r"^https?://.*" if settings.LAN_MODE else None,
     allow_credentials=True,
     allow_methods=["*"],    # GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],    # Authorization, Content-Type, etc.
@@ -123,3 +124,9 @@ def root():
         "version": settings.APP_VERSION,
         "docs": "/docs",
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
+

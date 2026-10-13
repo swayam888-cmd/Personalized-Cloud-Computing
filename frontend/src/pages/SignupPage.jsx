@@ -42,7 +42,10 @@ export default function SignupPage() {
     } catch (err) {
       // The API returns specific error messages for validation failures
       const message =
-        err.response?.data?.detail || 'Registration failed. Please try again.'
+        err.response?.data?.detail ||
+        (!err.response || err.code === 'ERR_NETWORK'
+          ? 'Cannot connect to backend server. Ensure the server is running on the LAN.'
+          : 'Registration failed. Please try again.')
       setError(message)
     } finally {
       setLoading(false)

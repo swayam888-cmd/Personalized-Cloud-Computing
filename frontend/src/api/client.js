@@ -45,16 +45,29 @@ import axios from 'axios'
  * 2. Same hostname as the current page, port 8000
  */
 function resolveApiUrl() {
-  // Check for manual override via environment variable
+  // 1. Check for manual override via environment variable
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL
   }
 
-  // Dynamic: use the same hostname the user typed to reach the frontend
-  // e.g., if they're at http://192.168.1.42:5173, API is at http://192.168.1.42:8000
-  const protocol = window.location.protocol  // "http:" or "https:"
-  const hostname = window.location.hostname   // "localhost" or "192.168.1.42"
-  return `${protocol}//${hostname}:8000`
+  // 2. In development (Vite dev server), use relative URL (empty string).
+  // Vite proxies all /api requests directly to backend (http://127.0.0.1:8000).
+  // This eliminates:
+  // - Cross-origin (CORS) preflight blocks on mobile
+  // - Firewall/network port 8000 access restrictions
+  // - IP/hostname mismatches (e.g. .local vs LAN IP)
+  if (import.meta.env.DEV) {
+    return ''
+  }
+
+  // 3. Fallback for production preview
+  if (typeof window !== 'undefined' && window.location) {
+    const protocol = window.location.protocol
+    const hostname = window.location.hostname
+    return `${protocol}//${hostname}:8000`
+  }
+
+  return 'http://127.0.0.1:8000'
 }
 
 const API_URL = resolveApiUrl()

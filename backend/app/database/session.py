@@ -33,11 +33,12 @@ from app.core.config import settings
 # The engine manages the actual database connection(s).
 # connect_args={"check_same_thread": False} is only needed for SQLite
 # because SQLite doesn't allow multiple threads to use the same connection.
+db_url = settings.resolved_database_url
 engine_kwargs = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+if db_url.startswith("sqlite"):
     engine_kwargs["connect_args"] = {"check_same_thread": False}
 
-engine = create_engine(settings.DATABASE_URL, **engine_kwargs)
+engine = create_engine(db_url, **engine_kwargs)
 
 # ─── Session Factory ────────────────────────────────────
 # Each call to SessionLocal() creates a new session (a "conversation" with the DB).
