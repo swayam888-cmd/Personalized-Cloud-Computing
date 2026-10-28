@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import SystemResourceGauges from '../components/admin/SystemResourceGauges'
 import SystemHostInfoWidget from '../components/admin/SystemHostInfoWidget'
+import UserManagementTable from '../components/admin/UserManagementTable'
 
 export default function AdminPage() {
   const { user, logout } = useAuth()
@@ -119,9 +120,7 @@ export default function AdminPage() {
               <SystemHostInfoWidget />
             </div>
           ) : (
-            <div className="p-8 rounded-2xl bg-surface-800/60 border border-surface-700/50 text-center">
-              <p className="text-slate-400 text-sm">User administration console loading...</p>
-            </div>
+            <UserManagementTable />
           )}
         </div>
       </main>
