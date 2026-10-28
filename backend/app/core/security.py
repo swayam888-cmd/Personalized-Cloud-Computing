@@ -112,3 +112,7 @@ def get_current_admin(
             detail="Admin access required",
         )
     return user
+
+
+# Alias for dependency injection clarity: Depends(require_admin)
+require_admin = get_current_admin
