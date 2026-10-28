@@ -61,18 +61,20 @@ Personalized-Cloud-Computing/
 │   │   │   ├── auth.py        ← POST /register, /login, /me, /password, PUT /profile
 │   │   │   ├── files.py       ← POST /upload, /folder, GET /list, /download, DELETE
 │   │   │   ├── activity.py    ← GET /api/activity/feed, /stats, /storage-categories
-│   │   │   └── network.py     ← GET /api/network/info (Sprint 5)
+│   │   │   ├── network.py     ← GET /api/network/info (Sprint 5)
+│   │   │   └── admin.py       ← GET /metrics, /users, PUT /quota, PATCH /status, /role (Sprint 6)
 │   │   ├── core/              ← Application configuration & utilities
 │   │   │   ├── __init__.py
 │   │   │   ├── config.py      ← Pydantic settings, dynamic CORS origins
-│   │   │   ├── security.py    ← Bcrypt password hashing & JWT token generation
-│   │   │   └── network.py     ← Socket-based LAN IP auto-detection (Sprint 5)
+│   │   │   ├── security.py    ← Bcrypt password hashing, JWT & require_admin guard
+│   │   │   ├── network.py     ← Socket-based LAN IP auto-detection (Sprint 5)
+│   │   │   └── admin_cli.py   ← Admin bootstrap & account promotion CLI (Sprint 6)
 │   │   ├── database/          ← Database engine & session
 │   │   │   ├── __init__.py
 │   │   │   └── session.py     ← SQLAlchemy sessionmaker & Base
 │   │   ├── models/            ← SQLAlchemy database models
 │   │   │   ├── __init__.py
-│   │   │   ├── user.py        ← User account & quota tracking
+│   │   │   ├── user.py        ← User account, roles & quota tracking
 │   │   │   ├── file.py        ← File and folder metadata, parent hierarchy
 │   │   │   └── activity.py    ← Audit logging & user action records (Sprint 4)
 │   │   ├── schemas/           ← Pydantic request/response schemas
@@ -80,13 +82,15 @@ Personalized-Cloud-Computing/
 │   │   │   ├── auth.py        ← User schemas, login/register validation
 │   │   │   ├── file.py        ← File/folder schemas, quota responses
 │   │   │   ├── activity.py    ← Activity feed, stats, category breakdown
-│   │   │   └── network.py     ← Network info response schema
+│   │   │   ├── network.py     ← Network info response schema
+│   │   │   └── admin.py       ← System metrics & user admin schemas (Sprint 6)
 │   │   └── services/          ← Business logic & storage management
 │   │       ├── __init__.py
 │   │       ├── auth.py        ← Authentication & profile service
 │   │       ├── file.py        ← File storage, UUID hashing, folder recursion
 │   │       ├── activity.py    ← Audit log generation & analytics queries
-│   │       └── network.py     ← Network info aggregation
+│   │       ├── system.py      ← Real-time host telemetry via psutil (Sprint 6)
+│   │       └── admin.py       ← User directory, quotas & account suspension (Sprint 6)
 │   ├── requirements.txt
 │   ├── .env.example
 │   └── .env
@@ -97,7 +101,8 @@ Personalized-Cloud-Computing/
 │   │   │   ├── auth.js        ← Auth API calls & token handling
 │   │   │   ├── files.js       ← File upload/download/folder API
 │   │   │   ├── activity.js    ← Activity log & analytics API
-│   │   │   └── network.js     ← Network info API (Sprint 5)
+│   │   │   ├── network.js     ← Network info API (Sprint 5)
+│   │   │   └── admin.js       ← Metrics & user management API (Sprint 6)
 │   │   ├── components/        ← Modular UI widgets & components
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Sidebar.jsx
@@ -106,13 +111,19 @@ Personalized-Cloud-Computing/
 │   │   │   ├── RecentFilesWidget.jsx
 │   │   │   ├── ActivityTimelineWidget.jsx
 │   │   │   ├── ProfileSecurityWidget.jsx
-│   │   │   └── NetworkStatusWidget.jsx (Sprint 5)
+│   │   │   ├── NetworkStatusWidget.jsx (Sprint 5)
+│   │   │   ├── AdminRoute.jsx (Sprint 6)
+│   │   │   └── admin/         ← Admin control plane widgets (Sprint 6)
+│   │   │       ├── SystemResourceGauges.jsx
+│   │   │       ├── SystemHostInfoWidget.jsx
+│   │   │       └── UserManagementTable.jsx
 │   │   ├── pages/             ← Application route views
 │   │   │   ├── LandingPage.jsx
 │   │   │   ├── LoginPage.jsx
-│   │   │   ├── RegisterPage.jsx
+│   │   │   ├── SignupPage.jsx
 │   │   │   ├── DashboardPage.jsx
-│   │   │   └── FilesPage.jsx
+│   │   │   ├── FilesPage.jsx
+│   │   │   └── AdminPage.jsx  (Sprint 6)
 │   │   ├── context/           ← React Context (AuthContext)
 │   │   ├── main.jsx           ← React entry point
 │   │   ├── App.jsx            ← Root component & routing
@@ -185,6 +196,38 @@ When a user visits `http://192.168.1.42:5173`:
 | **Vite**         | Next-gen frontend tooling with 0.0.0.0 LAN dev server     |
 | **Tailwind CSS v4** | Modern utility-first styling with dark mode & tokens     |
 | **Bcrypt & JWT** | Cryptographic password hashing & stateless session auth   |
+| **psutil**       | Hardware and process resource telemetry & health monitoring |
+
+---
+
+## Administration & System Resource Monitoring (Sprint 6)
+
+### 1. Control Plane & Role-Based Access Control
+The platform implements explicit role separation (`user` vs `admin`) enforced via the `require_admin` dependency:
+- Endpoints under `/api/admin/*` reject unauthorized requests with HTTP 401 or non-admin requests with HTTP 403.
+- Client-side routes (`/admin`) are guarded via `AdminRoute.jsx` which redirects non-admin users to `/dashboard`.
+- Prevent self-lockout: An administrator cannot suspend their own account or demote themselves if they are the sole active administrator.
+
+### 2. Live Telemetry Engine (`psutil`)
+```
+Host Kernel / Hardware
+       ↓ psutil
+SystemMetricsService (app/services/system.py)
+       ↓
+GET /api/admin/metrics
+       ↓ (Polling intervals: 3s / 5s / 10s / paused)
+SystemResourceGauges.jsx & SystemHostInfoWidget.jsx
+```
+- **CPU**: Real-time utilization %, logical & physical core counts, and clock frequencies.
+- **RAM**: Used vs total physical memory and non-swapped available memory.
+- **Disk**: Partition saturation and free space for the user storage mount point.
+- **Process**: Memory footprint (RSS) and active worker thread counts of the FastAPI ASGI process.
+
+### 3. User Directory & Quota Control Plane
+- Aggregated multi-user storage analytics via SQLAlchemy functions (`func.coalesce(func.sum(File.size_bytes), 0)`).
+- Dynamic quota adjustments (`PUT /api/admin/users/{id}/quota`) supporting preset and custom byte allocations.
+- Account suspension/activation (`PATCH /api/admin/users/{id}/status`) immediately preventing suspended users from authenticating.
+- Full auditability: All administrative interventions are recorded in the `Activity` audit trail.
 
 ---
 
@@ -195,7 +238,7 @@ When a user visits `http://192.168.1.42:5173`:
 - [x] **Sprint 3** — Personal Cloud Storage Engine (Upload, Download, Folder hierarchy, Quotas)
 - [x] **Sprint 4** — Cloud Dashboard & Activity System (Analytics, Feed, Profile Management)
 - [x] **Sprint 5** — LAN Private Cloud Deployment (0.0.0.0 binding, Network Info, Multi-device UI)
-- [ ] **Sprint 6** — Administration & Resource Monitoring (`psutil` CPU/RAM/Disk metrics, User mgmt)
+- [x] **Sprint 6** — Administration & Resource Monitoring (`psutil` CPU/RAM/Disk metrics, User mgmt)
 - [ ] **Sprint 7** — File Sharing & Collaboration Subsystem (Public links, tokens, expiry)
 - [ ] **Sprint 8** — PostgreSQL & Database Migrations (PostgreSQL driver, Alembic)
 - [ ] **Sprint 9** — Docker & Containerized Infrastructure (Dockerfiles, Docker Compose)

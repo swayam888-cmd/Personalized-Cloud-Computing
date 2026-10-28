@@ -1,7 +1,7 @@
 # 📘 User Guide: How to Run & Verify All Features
 
 **Personalized Cloud Infrastructure for Secure Data Storage and Management**  
-*Comprehensive operational manual and feature testing guide covering Sprint 1 through Sprint 5.*
+*Comprehensive operational manual and feature testing guide covering Sprint 1 through Sprint 6.*
 
 ---
 
@@ -14,6 +14,7 @@
    - [Sprint 3: Cloud File & Folder Storage Engine](#sprint-3-cloud-file--folder-storage-engine)
    - [Sprint 4: Analytics Dashboard & Activity Logs](#sprint-4-analytics-dashboard--activity-logs)
    - [Sprint 5: LAN Multi-Device Deployment](#sprint-5-lan-multi-device-deployment)
+   - [Sprint 6: Administration & Resource Monitoring](#sprint-6-administration--resource-monitoring)
 3. [Step-by-Step 10-Minute Verification Checklist](#3-step-by-step-10-minute-verification-checklist)
 4. [Troubleshooting & FAQs](#4-troubleshooting--faqs)
 
@@ -131,6 +132,24 @@ Navigate to the **Dashboard** page (`http://localhost:5173/dashboard`):
 | **Mobile Access** | Connect your smartphone or tablet to the **same Wi-Fi**. Open browser (Safari / Chrome) and go to `http://<YOUR_LAN_IP>:5173`. | Mobile-responsive cloud login screen loads seamlessly. |
 | **Mobile File Upload** | Log in on your phone, navigate to **Files**, and upload a photo directly from your camera roll. | Photo uploads over local Wi-Fi. Refreshing your desktop shows the photo immediately! |
 | **Public Discovery Endpoint** | In any browser, open `http://<YOUR_LAN_IP>:8000/api/network/info`. | Returns JSON with server hostname, LAN IP, and connectivity status without requiring authentication. |
+
+---
+
+### Sprint 6: Administration & Resource Monitoring
+
+| Feature | How to Check | Expected Result |
+| :--- | :--- | :--- |
+| **Admin CLI Bootstrap** | In terminal, run: `cd backend && ./venv/bin/python -m app.core.admin_cli list` | Formatted table lists all users, their role (`USER` / `ADMIN`), and active status. |
+| **Promote User to Admin** | Run: `./venv/bin/python -m app.core.admin_cli promote demo` | Terminal outputs: `Successfully updated demo to role: ADMIN`. |
+| **Admin Console Access** | Log in as an admin user. Notice the **Admin** shield button appears in the navbar. Click it (or visit `/admin`). | Admin Console opens with control plane header, live system telemetry meters, and tabs. |
+| **Role-Based Route Guard** | In an incognito tab or logged in as a normal user (`role='user'`), navigate directly to `/admin`. | The `AdminRoute` guard automatically intercepts unauthorized access and redirects back to `/dashboard`. |
+| **Live Telemetry Gauges** | On `/admin`, view the **System Metrics & Health** tab. | Real-time meters display CPU utilization %, RAM used/total, Disk partition saturation, and server uptime. |
+| **Live Polling Controls** | Switch polling interval between `3s`, `5s`, `10s`, and `Off`, or click the manual refresh icon. | Metrics update live at the chosen interval with a "Live" status indicator. |
+| **User Directory Overview** | Switch to the **User Accounts & Quotas** tab. | Overview cards display total accounts, active users, administrators, and aggregate allocated vs consumed storage. |
+| **Search & Filter Users** | Type in the search box or filter by Role / Status dropdowns. | Table filters accounts instantly without full page reloads. |
+| **Modify Storage Quota** | Click **Quota** next to any user. Choose a preset (`2 GB`, `5 GB`, etc.) or input custom GB and click Apply. | User quota is updated instantly and an `ADMIN_UPDATE_QUOTA` event is recorded in the audit activity log. |
+| **Suspend Account** | Click **Suspend** on any user and confirm. | Account status changes to `Suspended`. If the suspended user attempts to log in, they receive HTTP 403 "Account is deactivated". |
+| **Self-Lockout Safeguard** | On your own admin account row, attempt to click Suspend or Demote yourself. | Buttons are disabled or return HTTP 400 with a clear warning preventing self-lockout. |
 
 ---
 

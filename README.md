@@ -44,25 +44,26 @@ See [docs/lan-setup.md](docs/lan-setup.md) for LAN multi-device access setup.
 Personalized-Cloud-Computing/
 ├── backend/             # FastAPI application
 │   ├── app/
-│   │   ├── api/         # Route handlers (auth, files, activity, network)
-│   │   ├── core/        # Config, security, networking utilities
+│   │   ├── api/         # Route handlers (auth, files, activity, network, admin)
+│   │   ├── core/        # Config, security, networking & admin CLI utilities
 │   │   ├── database/    # DB engine, session setup
-│   │   ├── models/      # SQLAlchemy models (User, File, ActivityLog)
-│   │   ├── schemas/     # Pydantic validation schemas
-│   │   ├── services/    # Business logic & file management
+│   │   ├── models/      # SQLAlchemy models (User, File, Activity)
+│   │   ├── schemas/     # Pydantic validation schemas (auth, files, admin)
+│   │   ├── services/    # Business logic, storage, activity, system & admin
 │   │   └── main.py      # App entry point, lifecycle & CORS
 │   ├── requirements.txt
 │   └── .env.example
 ├── frontend/            # React + Vite application
 │   ├── src/
-│   │   ├── api/         # Dynamic API client & endpoint modules
-│   │   ├── components/  # Reusable widgets (Storage, Activity, Network)
-│   │   ├── pages/       # Dashboard, Files, Login, Register
+│   │   ├── api/         # Dynamic API client & endpoint modules (admin, files, etc.)
+│   │   ├── components/  # Reusable widgets & admin monitoring/user controls
+│   │   ├── pages/       # Dashboard, Files, Admin, Login, Signup
 │   │   └── index.css    # Tailwind CSS v4 design system
-│   ├── vite.config.js   # Dev server configured for 0.0.0.0 binding
+│   ├── vite.config.js   # Dev server configured for 0.0.0.0 binding & API proxy
 │   └── package.json
 ├── docs/                # Project documentation
 │   ├── architecture.md  # Architecture design & system layers
+│   ├── user-guide.md    # Complete User & Feature Testing Guide (Sprints 1-6)
 │   └── lan-setup.md     # Multi-device LAN deployment guide
 ├── docker/              # Docker configs (Sprint 9+)
 ├── .gitignore
@@ -145,7 +146,7 @@ For complete firewall, router, and troubleshooting instructions, see [docs/lan-s
 - [x] **Sprint 3** — Personal Cloud Storage (upload, download, folders, quota, UUID storage)
 - [x] **Sprint 4** — Cloud Dashboard & Activity (analytics, recent files, profile, activity logs)
 - [x] **Sprint 5** — LAN Private Cloud Deployment (multi-device access, LAN IP detection, network status widget)
-- [ ] **Sprint 6** — Administration & Resource Monitoring (admin dashboard, user mgmt, psutil)
+- [x] **Sprint 6** — Administration & Resource Monitoring (admin dashboard, user mgmt, psutil)
 - [ ] **Sprint 7** — File Sharing & Collaboration (share links, expiration, passwords)
 - [ ] **Sprint 8** — PostgreSQL & Database Migrations (PostgreSQL driver, Alembic migrations)
 - [ ] **Sprint 9** — Docker & Containerized Infrastructure (Dockerfiles, Docker Compose)
