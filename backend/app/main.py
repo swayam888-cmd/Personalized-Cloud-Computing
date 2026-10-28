@@ -35,6 +35,7 @@ from app.api.users import router as users_router
 from app.api.files import router as files_router
 from app.api.activity import router as activity_router
 from app.api.network import router as network_router
+from app.api.admin import router as admin_router
 
 # Import models so SQLAlchemy knows about them when creating tables
 from app.models import user as _user_model  # noqa: F401
@@ -110,6 +111,7 @@ app.include_router(users_router, prefix="/api")
 app.include_router(files_router, prefix="/api")
 app.include_router(activity_router, prefix="/api")
 app.include_router(network_router, prefix="/api")
+app.include_router(admin_router, prefix="/api")
 
 
 # ─── Root Endpoint ──────────────────────────────────────
