@@ -8,6 +8,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SystemResourceGauges from '../components/admin/SystemResourceGauges'
+import SystemHostInfoWidget from '../components/admin/SystemHostInfoWidget'
 
 export default function AdminPage() {
   const { user, logout } = useAuth()
@@ -109,11 +111,12 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Tab Content placeholder - will be populated by widgets */}
+        {/* Tab Content */}
         <div id="admin-tab-content">
           {activeTab === 'metrics' ? (
-            <div className="p-8 rounded-2xl bg-surface-800/60 border border-surface-700/50 text-center">
-              <p className="text-slate-400 text-sm">System telemetry widgets loading...</p>
+            <div className="space-y-6">
+              <SystemResourceGauges />
+              <SystemHostInfoWidget />
             </div>
           ) : (
             <div className="p-8 rounded-2xl bg-surface-800/60 border border-surface-700/50 text-center">
