@@ -114,3 +114,6 @@ class File(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
+    # Access share links: file.share_links → [ShareLink, ...]
+    share_links = relationship("ShareLink", back_populates="file", cascade="all, delete-orphan")

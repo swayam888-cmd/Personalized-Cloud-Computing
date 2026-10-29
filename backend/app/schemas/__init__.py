@@ -14,6 +14,12 @@ from app.schemas.admin import (
     UpdateStatusRequest,
     UpdateRoleRequest,
 )
+from app.schemas.sharing import (
+    ShareLinkCreate,
+    ShareLinkResponse,
+    ShareLinkPublicInfo,
+    ShareDownloadRequest,
+)
 
 __all__ = [
     "UserCreate",
@@ -37,4 +43,9 @@ __all__ = [
     "UpdateQuotaRequest",
     "UpdateStatusRequest",
     "UpdateRoleRequest",
+    "ShareLinkCreate",
+    "ShareLinkResponse",
+    "ShareLinkPublicInfo",
+    "ShareDownloadRequest",
 ]
+

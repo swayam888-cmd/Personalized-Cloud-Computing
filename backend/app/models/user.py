@@ -94,4 +94,7 @@ class User(Base):
     # Access all activity logs for this user: user.activities → [Activity, ...]
     activities = relationship("Activity", back_populates="user", cascade="all, delete-orphan")
 
+    # Access all share links created by this user: user.share_links → [ShareLink, ...]
+    share_links = relationship("ShareLink", back_populates="owner", cascade="all, delete-orphan")
+
 
